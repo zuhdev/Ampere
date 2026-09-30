@@ -1,0 +1,28 @@
+# deps
+node_modules/
+
+# build artifacts
+dist/
+build/
+cache/
+artifacts/
+typechain-types/
+coverage/
+coverage.json
+tsconfig.tsbuildinfo
+*.tsbuildinfo
+
+# env & secrets
+.env
+.env.local
+.env.*.local
+*.pem
+
+# misc
+.DS_Store
+*.log
+npm-debug.log*
+
+# relay heartbeat counters (persisted, per-deployment)
+relay-state.json
+relay-state.json.tmp

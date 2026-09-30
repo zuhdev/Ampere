@@ -1,0 +1,23 @@
+{
+  "name": "ampere",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Ampere — gas-sponsorship (gasless) layer for BOT Chain testnet (chain 968)",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "workspaces": [
+    "contracts",
+    "sdk",
+    "relay",
+    "api",
+    "frontend"
+  ],
+  "scripts": {
+    "compile": "npm run compile --workspace contracts",
+    "test": "npm run test --workspace contracts",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "build": "npm run build --workspaces --if-present"
+  }
+}
