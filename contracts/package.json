@@ -1,0 +1,33 @@
+{
+  "name": "@ampere/contracts",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Ampere gas-sponsorship contracts for BOT Chain (testnet 968)",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "typecheck": "tsc --noEmit",
+    "node": "hardhat node",
+    "deploy:testnet": "hardhat run scripts/deploy.ts --network botTestnet",
+    "init:testnet": "hardhat run scripts/init.ts --network botTestnet",
+    "smoke:testnet": "hardhat run scripts/smoke.ts --network botTestnet",
+    "e2e:testnet": "hardhat run scripts/e2e.ts --network botTestnet",
+    "verify:testnet": "hardhat run scripts/verify.ts --network botTestnet",
+    "recover:testnet": "hardhat run scripts/recover-legacy.ts --network botTestnet"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@types/chai": "^4.3.16",
+    "@types/mocha": "^10.0.6",
+    "@types/node": "^22.5.0",
+    "chai": "^4.4.1",
+    "dotenv": "^16.4.5",
+    "ethers": "^6.13.2",
+    "hardhat": "^2.22.10",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.4"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.6.1"
+  }
+}
