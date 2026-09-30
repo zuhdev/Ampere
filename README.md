@@ -1,5 +1,9 @@
 # Ampere
 
+> **Ampere lets an app pay its users' transaction fees.**
+>
+> On a blockchain, every action costs gas — paid in the network's own token. That means a new user is stuck before they even start: no BOT, no transactions, no matter how good the app is. Ampere flips that. The app declares one simple spending rule — *which* contracts it will pay for, a cap per user, a budget per day — and then covers the gas on every eligible transaction. Users sign normally and pay **0 BOT**. The rule lives in the contracts themselves, so not even a compromised server can overspend the app's money.
+
 Gas sponsorship (gasless transactions) for BOT Chain. Apps fund gas through an **on-chain policy** — users and agents sign with zero BOT in their wallet.
 
 - **Scope:** BOT Chain **testnet only** — chain `968`, RPC `https://rpc.bohr.life`, explorer `https://scan.bohr.life`. Mainnet (677) is out of scope for v1.
