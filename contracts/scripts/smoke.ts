@@ -1,5 +1,5 @@
 /**
- * Ampere smoke — read-only sanity checks against BOT Chain testnet.
+ * Ampere smoke — read-only sanity checks against BOT Chain (testnet or mainnet).
  * Verifies deployments are alive, wired correctly, and the chain quirks hold.
  */
 import { ethers, network } from "hardhat";

@@ -1,5 +1,6 @@
 import { AmpereLogo } from "./Logo";
 import { REGISTRY, VAULT, PAYMASTER, COUNTER, BOT_LINKS, explorerAddress, type Tab } from "../lib/constants";
+import { CHAIN_ID, IS_MAINNET } from "../wagmi";
 
 interface LinkDef {
   label: string;
@@ -44,7 +45,7 @@ export default function Footer({ onNavigate }: { onNavigate: (tab: Tab) => void 
           <div className="footer-brand">
             <AmpereLogo />
             <span className="chip ok">
-              <span className="dot" /> Live on BOT Testnet · chain 968
+              <span className="dot" /> Live on {IS_MAINNET ? "BOT Mainnet" : "BOT Testnet"} · chain {CHAIN_ID}
             </span>
           </div>
 
@@ -73,7 +74,7 @@ export default function Footer({ onNavigate }: { onNavigate: (tab: Tab) => void 
                 { label: "Website", href: BOT_LINKS.website },
                 { label: "Block explorer", href: BOT_LINKS.explorer },
                 { label: "Developer docs", href: BOT_LINKS.docs },
-                { label: "Testnet faucet", href: BOT_LINKS.faucet },
+                ...(IS_MAINNET ? [] : [{ label: "Testnet faucet", href: BOT_LINKS.faucet }]),
                 { label: "GitHub", href: BOT_LINKS.github },
               ]}
             />
@@ -91,7 +92,7 @@ export default function Footer({ onNavigate }: { onNavigate: (tab: Tab) => void 
             <span className="badge-label">Built on</span>
             <img src="/botchain-footer-logo.png" alt="BOT Chain" className="botchain-logo" />
           </a>
-          <span className="muted">© 2026 Ampere · Testnet-only (chain 968)</span>
+          <span className="muted">© 2026 Ampere · BOT Chain {IS_MAINNET ? "mainnet" : "testnet"} (chain {CHAIN_ID})</span>
         </div>
       </div>
     </footer>

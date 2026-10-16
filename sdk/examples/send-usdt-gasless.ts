@@ -9,7 +9,8 @@
 import { parseUnits } from "viem";
 import { Ampere } from "../src/index.js";
 
-const USDT_TESTNET = "0x75edC9335175Fc0552D51D48439F229c10420fe3" as const; // 6 dp
+const USDT_TESTNET = "0x75edC9335175Fc0552D51D48439F229c10420fe3" as const; // 6 dp, chain 968
+// const USDT_MAINNET = "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C" as const; // 6 dp, chain 677
 
 async function main() {
   const ampere = new Ampere({

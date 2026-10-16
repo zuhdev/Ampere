@@ -1,5 +1,5 @@
 /**
- * Ampere e2e — on-chain gasless round trip on BOT Chain testnet:
+ * Ampere e2e — on-chain gasless round trip on BOT Chain (testnet or mainnet):
  *   wallet with 0 gas → relay (sponsorAndSend) → Counter.increment()
  * Prints the gas delta (what the user WOULD have paid vs paid = 0).
  */
@@ -42,7 +42,7 @@ async function main() {
     `user WOULD have paid: ~${ethers.formatEther(wouldCost)} BOT (${STATIC_GAS} gas @ ${gasPrice} wei; raw estimate ${estGas})`
   );
 
-  // Relay: deployer is the relayer (testnet). In prod the relay service holds this key.
+  // Relay: deployer is the relayer until the relay service key is provisioned (setRelayer).
   const tx = await paymaster
     .connect(deployer)
     .sponsorAndSend(DEMO_APP_KEY, d.Counter!, user.address, GAS_BUDGET_WEI, data, {

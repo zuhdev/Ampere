@@ -1,25 +1,31 @@
 /**
- * Ampere deploy — BOT Chain TESTNET (chain 968) only.
+ * Ampere deploy — BOT Chain testnet (968) or mainnet (677).
  *
- * Chain quirks handled:
+ * Chain quirks handled (both nets):
  * - eth_feeHistory broken → explicit gasPrice (20 gwei) + gas limit set in hardhat.config.
  * - Never rely on fee estimation.
+ *
+ * Mainnet safety: deploying to chain 677 requires CONFIRM_MAINNET=1.
  */
 import { ethers, network } from "hardhat";
 import { saveDeployments } from "../deploy/deployments";
 
 async function main() {
   const [deployer] = await ethers.getSigners();
-  const network = await ethers.provider.getNetwork();
-  if (network.chainId === 677n) {
-    throw new Error("Mainnet (677) deployment is OUT OF SCOPE — testnet (968) only.");
+  const net = await ethers.provider.getNetwork();
+  if (net.chainId === 677n && process.env.CONFIRM_MAINNET !== "1") {
+    throw new Error("Mainnet (677) deploy blocked — set CONFIRM_MAINNET=1 to proceed.");
   }
-  console.log(`deploying Ampere on chain ${network.chainId} with ${deployer.address}`);
+  console.log(`deploying Ampere on chain ${net.chainId} (${network.name}) with ${deployer.address}`);
 
   const balance = await ethers.provider.getBalance(deployer.address);
   console.log(`deployer balance: ${ethers.formatEther(balance)} BOT`);
   if (balance === 0n) {
-    throw new Error("Deployer has no BOT for gas. Use the faucet: https://faucet.botchain.ai/basic");
+    const hint =
+      net.chainId === 677n
+        ? "Fund the deployer with real BOT — there is no faucet on mainnet."
+        : "Use the faucet: https://faucet.bohr.life/basic/";
+    throw new Error(`Deployer has no BOT for gas. ${hint}`);
   }
 
   // 1) SponsorPolicyRegistry
@@ -60,8 +66,8 @@ async function main() {
   await (await paymaster.setRelayer(deployer.address)).wait();
 
   await saveDeployments(network.name, {
-    network: "botTestnet",
-    chainId: Number(network.chainId),
+    network: network.name,
+    chainId: Number(net.chainId),
     deployer: deployer.address,
     deployedAt: new Date().toISOString(),
     SponsorPolicyRegistry: await registry.getAddress(),

@@ -6,7 +6,12 @@
 
 Gas sponsorship (gasless transactions) for BOT Chain. Apps fund gas through an **on-chain policy** — users and agents sign with zero BOT in their wallet.
 
-- **Scope:** BOT Chain **testnet only** — chain `968`, RPC `https://rpc.bohr.life`, explorer `https://scan.bohr.life`. Mainnet (677) is out of scope for v1.
+- **Scope:** BOT Chain — **mainnet 677 (live)** plus testnet `968` for development. Selected by `AMPERE_NETWORK` / `VITE_NETWORK` (default `testnet`).
+
+  | Network | Chain | RPC | Explorer |
+  |---|---|---|---|
+  | **Mainnet** | `677` | `https://rpc.botchain.ai` | `https://scan.botchain.ai` |
+  | Testnet | `968` | `https://rpc.bohr.life` | `https://scan.bohr.life` |
 - **Stack:** Hardhat + Solidity 0.8.20, viem, Express, React + wagmi. Node ≥ 22.
 - **License:** MIT.
 
@@ -29,7 +34,7 @@ client ──▶ API (:8787) ── policy pre-check, rate limit ──▶ relay
 | `BudgetVault` | Sponsorship escrow per appKey: `depositNative`, `budgetOf`, owner-only `withdraw`. Never holds user funds. |
 | `Counter` | Demo target contract (`increment()`). |
 
-Demo policy (created by `init:testnet`): allowlist `[Counter]`, cap `0.05 BOT`/address/24h, budget `200 BOT`/day, `appKey = keccak256("ampere.demo")` (printed by `init:testnet`; also in `frontend/.env` as `VITE_APP_KEY`).
+Demo policy (created by `init:mainnet` / `init:testnet`): allowlist `[Counter]`, cap `0.05 BOT`/address/24h, budget `200 BOT`/day, `appKey = keccak256("ampere.demo")` (printed by init; also in `frontend/.env` as `VITE_APP_KEY`).
 
 ## Monorepo
 
@@ -39,7 +44,8 @@ sdk/         @ampere/sdk — simulate / execute / usage / recentTx
 relay/       viem relay client (library) + standalone heartbeat monitor
 api/         Express REST API (policy CRUD, simulate, relay, usage)
 frontend/    Vite + React + wagmi — Dashboard, Policy editor, Relay playground
-.github/     CI: contracts, typechecks, frontend build, testnet smoke, secret scan
+site/        Static marketing landing page - plain HTML/CSS/JS, no build step
+.github/     CI: contracts, typechecks, frontend build, testnet smoke (+ guarded mainnet smoke), secret scan
 ```
 
 ## Quick start
@@ -52,18 +58,27 @@ npm run compile                    # hardhat compile
 npm run test                       # 21 tests
 ```
 
-Deploy + initialize testnet, then run the services:
+Deploy + initialize (one-time per network), then run the services:
 
 ```bash
-npm run deploy:testnet -w contracts    # writes contracts/deployments/botTestnet.json
-npm run init:testnet -w contracts      # funds paymaster float + vault, sets demo policy
+# mainnet (677) — CONFIRM_MAINNET=1 required for deploy/init/set-relayer writes
+npm run deploy:mainnet -w contracts   # writes contracts/deployments/botMainnet.json
+npm run init:mainnet -w contracts     # INIT_FLOAT_BOT / INIT_VAULT_BOT required on mainnet
+
+# testnet (968)
+npm run deploy:testnet -w contracts   # writes contracts/deployments/botTestnet.json
+npm run init:testnet -w contracts
 
 npm run start -w relay                 # heartbeat monitor (self-check + JSON heartbeat)
 npm run dev -w api                     # REST API on :8787
 npm run dev -w frontend                # dashboard on :5173
 ```
 
-Copy `frontend/.env.example` → `frontend/.env` and fill the addresses from `contracts/deployments/botTestnet.json`.
+Services pick the network via `AMPERE_NETWORK=mainnet|testnet` (relay, api) and `VITE_NETWORK` (frontend). Copy `frontend/.env.example` → `frontend/.env` and fill the addresses from the matching `contracts/deployments/*.json` (mainnet is already wired in `frontend/.env`).
+
+### Mainnet is already deployed
+
+The four contracts are live and verified on chain 677 — see **Deployed mainnet addresses** below. Re-running `deploy:mainnet` deploys a *fresh* set (deployments are not idempotent).
 
 ## Environment variables
 
@@ -71,13 +86,16 @@ Each service loads `.env` **from its own directory** (`dotenv`, cwd). Template: 
 
 | Variable | Used by | Default | Notes |
 |---|---|---|---|
-| `BOT_TESTNET_RPC_URL` | contracts, relay | `https://rpc.bohr.life` | |
-| `BOT_TESTNET_CHAIN_ID` | relay | `968` | must match the RPC (viem signs EIP-155 with it) |
-| `DEPLOYER_PRIVATE_KEY` | contracts scripts | — | deploy/init/verify signer |
+| `AMPERE_NETWORK` | relay, api | `testnet` | `testnet` (968) or `mainnet` (677); selects the RPC/chain/explorer below |
+| `BOT_MAINNET_RPC_URL` / `BOT_TESTNET_RPC_URL` | contracts, relay | `https://rpc.botchain.ai` / `https://rpc.bohr.life` | |
+| `BOT_MAINNET_CHAIN_ID` / `BOT_TESTNET_CHAIN_ID` | relay | `677` / `968` | must match the RPC (viem signs EIP-155 with it) |
+| `DEPLOYER_PRIVATE_KEY` | contracts scripts (testnet) | — | testnet deploy/init/verify signer |
+| `MAINNET_DEPLOYER_PRIVATE_KEY` | contracts scripts (mainnet) | — | mainnet deploy/init/set-relayer/verify signer; falls back to `DEPLOYER_PRIVATE_KEY` if unset |
+| `CONFIRM_MAINNET` | `deploy`/`init`/`set-relayer` mainnet | — | must be `1` to allow mainnet state changes |
 | `RELAY_PRIVATE_KEY` | relay, api | — | relayer/owner signer; **required** (fail-fast) |
-| `REGISTRY_ADDRESS` / `VAULT_ADDRESS` / `PAYMASTER_ADDRESS` | relay, api | — | from `deployments/botTestnet.json`; **required** |
-| `ETHERSCAN_API_KEY` | `verify:testnet` | — | Etherscan-compatible API on scan.bohr.life; `BOT_EXPLORER_API_URL` overrides the endpoint (default `https://scan.bohr.life/api`) |
-| `INIT_FLOAT_BOT` / `INIT_VAULT_BOT` | `init:testnet` | `10` / `50` | paymaster gas float / vault funding (BOT) |
+| `REGISTRY_ADDRESS` / `VAULT_ADDRESS` / `PAYMASTER_ADDRESS` | relay, api | — | from `deployments/botMainnet.json` or `botTestnet.json`; **required** |
+| `ETHERSCAN_API_KEY` | `verify:*` | — | Etherscan-compatible API (`scan.bohr.life/api` testnet, `scan.botchain.ai/api` mainnet); `BOT_EXPLORER_API_URL` overrides the endpoint |
+| `INIT_FLOAT_BOT` / `INIT_VAULT_BOT` | `init:*` | `10` / `50` (testnet) | paymaster gas float / vault funding (BOT); **required on mainnet** (deployed with `0.01` / `0.02`) |
 | `PORT` | api | `8787` | API port |
 | `AMPERE_OWNER_KEY` | api | `dev-owner-key` | owner auth header value; rotate before any real deployment |
 | `RELAY_RATE_LIMIT` | api | `30` | relay requests per appKey per minute |
@@ -85,21 +103,33 @@ Each service loads `.env` **from its own directory** (`dotenv`, cwd). Template: 
 | `SEED_APP_KEY` | api | — | registers this sponsor from its on-chain policy at startup (store is in-memory) |
 | `HEARTBEAT_SECONDS` | relay | `60` | heartbeat interval |
 | `LEGACY_VAULT` / `LEGACY_PAYMASTER` / `LEGACY_RECEIVER` / `DRY_RUN` | `recover:testnet` | `DRY_RUN=1` | legacy contract recovery |
-| `VITE_REGISTRY` `VITE_VAULT` `VITE_PAYMASTER` `VITE_COUNTER` `VITE_APP_KEY` `VITE_API_URL` `VITE_RPC_URL` | frontend | — | see `frontend/.env.example` |
+| `VITE_NETWORK` `VITE_REGISTRY` `VITE_VAULT` `VITE_PAYMASTER` `VITE_COUNTER` `VITE_APP_KEY` `VITE_API_URL` `VITE_RPC_URL` | frontend | — | see `frontend/.env.example` |
 
 ## Contracts
 
 | Script | Command | What it does |
 |---|---|---|
-| deploy | `npm run deploy:testnet -w contracts` | Deploys Registry → Vault → Paymaster → Counter; writes `deployments/botTestnet.json` |
-| init | `npm run init:testnet -w contracts` | Funds paymaster float + vault budget, sets the demo policy (allowlist: Counter) |
-| smoke | `npm run smoke:testnet -w contracts` | Read-only health check against RPC + explorer |
-| e2e | `npm run e2e:testnet -w contracts` | Gasless round trip: relays `Counter.increment()` for a 0-gas wallet, prints the gas delta |
-| verify | `npm run verify:testnet -w contracts` | Source verification on scan.bohr.life (solc long version read from build-info) |
+| deploy | `npm run deploy:{testnet,mainnet} -w contracts` | Deploys Registry → Vault → Paymaster → Counter; writes `deployments/botTestnet.json` / `botMainnet.json` (mainnet requires `CONFIRM_MAINNET=1`) |
+| init | `npm run init:{testnet,mainnet} -w contracts` | Funds paymaster float + vault budget, sets the demo policy (allowlist: Counter) |
+| smoke | `npm run smoke:{testnet,mainnet} -w contracts` | Read-only health check against RPC + explorer |
+| e2e | `npm run e2e:{testnet,mainnet} -w contracts` | Gasless round trip: relays `Counter.increment()` for a 0-gas wallet, prints the gas delta |
+| verify | `npm run verify:{testnet,mainnet} -w contracts` | Source verification on the network's explorer (solc long version read from build-info) |
+| set-relayer | `RELAYER_ADDRESS=0x… npm run set-relayer:{testnet,mainnet} -w contracts` | Rotates the paymaster relayer (owner-only) |
 | recover | `npm run recover:testnet -w contracts` | Withdraws funds from legacy contracts. **`DRY_RUN=1` by default**; set `DRY_RUN=0` to execute |
 | gastrace | `npx hardhat run scripts/gastrace.ts` | Gas calibration — measures relay intrinsic cost vs paymaster overhead constants |
 
-### Deployed testnet addresses
+### Deployed mainnet addresses (chain 677)
+
+| Contract | Address |
+|---|---|
+| SponsorPolicyRegistry | [`0x8ECe17195d5E2585F9fb16430A7959c52E612028`](https://scan.botchain.ai/address/0x8ECe17195d5E2585F9fb16430A7959c52E612028) |
+| BudgetVault | [`0x34531Bb172222EAf4F54c405c9874eAc002ecc1A`](https://scan.botchain.ai/address/0x34531Bb172222EAf4F54c405c9874eAc002ecc1A) |
+| GaslessPaymaster | [`0x0Cf96E419062d6C95596b2c77F01773897E77a56`](https://scan.botchain.ai/address/0x0Cf96E419062d6C95596b2c77F01773897E77a56) |
+| Counter | [`0xc1Ad3946d6376597127701117E7825A4CD3A3222`](https://scan.botchain.ai/address/0xc1Ad3946d6376597127701117E7825A4CD3A3222) |
+
+All four are verified on `scan.botchain.ai`. Source of truth: `contracts/deployments/botMainnet.json` (relayer: `0x231F26764f7d9e3deB64818005Ca3115D17d2516`; paymaster float `0.01 BOT`, vault `0.02 BOT`).
+
+### Deployed testnet addresses (chain 968)
 
 | Contract | Address |
 |---|---|
@@ -128,7 +158,7 @@ Base URL `http://localhost:8787`, JSON in/out. Auth: `x-ampere-key` header (owne
 # create a sponsor (owner auth)
 curl -X POST http://localhost:8787/v1/sponsors \
   -H "content-type: application/json" -H "x-ampere-key: dev-owner-key" \
-  -d '{"policy":{"allowlist":["0x1b1d2Db06F560Fe78B9018B6641358b0aBadb322"],
+  -d '{"policy":{"allowlist":["0xc1Ad3946d6376597127701117E7825A4CD3A3222"],
        "perAddressCap":"0.05","dailyBudget":"200"},"depositBot":"5"}'
 
 # relay a call
@@ -176,7 +206,16 @@ Vite dev server (`npm run dev -w frontend`), three views:
 - **Policy editor** — writes `setPolicy` directly from the wallet (bypasses the API entirely; requires policy owner).
 - **Relay playground** — same `Counter.increment()` gasless vs direct.
 
-Network for MetaMask: RPC `https://rpc.bohr.life`, chain ID `968`, currency `BOT`. The "direct" path typically fails in wallets — this is the problem Ampere works around (see quirks).
+Network for MetaMask: mainnet — RPC `https://rpc.botchain.ai`, chain ID `677`, currency `BOT` (testnet: `https://rpc.bohr.life` / `968`). The "direct" path typically fails in wallets — this is the problem Ampere works around (see quirks).
+
+## Marketing site
+
+`site/` is a static landing page for reviewers - plain HTML/CSS/JS, **no build step, no dependencies** (fonts come from Google Fonts).
+
+- Open `site/index.html` directly in a browser, or serve the folder: `npx serve site`
+- One scrollable page: problem, how it works, contracts, on-chain policy, SDK/REST snippets, security invariants, deployed addresses, quick start
+- `main.js` handles nav, tabs and code highlighting; append `?noanim` to the URL to disable reveal animations (screenshots/print)
+- Verified at 1440px and 390px widths; no horizontal overflow
 
 ## Chain quirks & design decisions
 
@@ -185,7 +224,6 @@ Network for MetaMask: RPC `https://rpc.bohr.life`, chain ID `968`, currency `BOT
 - **Policy lives on-chain.** The API is convenience + telemetry: pre-checks and rate limits can be bypassed; caps/allowlists cannot. Writes are chain-first — a failed `setPolicy` returns `502` and creates no store record.
 - **Single relayer signer**, serialized through `NonceQueue` — avoids nonce races between governance writes (`setPolicy`, `depositNative`) and relays.
 - **Recovery**: `recover:testnet` is `DRY_RUN=1` by default.
-
 ## Security invariants
 
 1. No user custody — vault holds sponsorship budget only; `withdraw` is owner-only.
@@ -204,4 +242,4 @@ npm test              # 21 Hardhat tests (contracts)
 npm run build         # workspaces (frontend = tsc + vite)
 ```
 
-CI (`.github/workflows/ci.yml`): contracts compile + test + typecheck · relay/api/sdk typecheck · frontend build · read-only testnet smoke on `main` · secret scan.
+CI (`.github/workflows/ci.yml`): contracts compile + test + typecheck · relay/api/sdk typecheck · frontend build · read-only testnet smoke on `main` (+ guarded mainnet smoke when `contracts/deployments/botMainnet.json` is present) · secret scan.

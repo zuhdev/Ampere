@@ -17,7 +17,7 @@ $principal = New-ScheduledTaskPrincipal -UserId $env:USERNAME -LogonType S4U -Ru
 
 Register-ScheduledTask -TaskName $taskName `
     -Action $action -Trigger $trigger -Settings $settings -Principal $principal `
-    -Description "Ampere relay supervisor: restarts the relay worker on crash (BOT Chain testnet)"
+    -Description "Ampere relay supervisor: restarts the relay worker on crash (BOT Chain)"
 
 Write-Host "Scheduled task '$taskName' installed. Start it with:"
 Write-Host "  Start-ScheduledTask -TaskName $taskName"

@@ -1,19 +1,52 @@
 import "dotenv/config";
 
 /**
- * BOT Chain TESTNET (968) only. Mainnet (677) is out of scope for v1.
+ * BOT Chain — testnet (968) or mainnet (677), selected by AMPERE_NETWORK
+ * (default "testnet" so existing .env files keep working unchanged).
  *
- * Chain quirks handled here:
+ * Chain quirks handled here (both nets):
  *  - eth_feeHistory is broken → we never use it; gasPrice comes from eth_gasPrice
  *    (20 gwei) and we ALWAYS send explicit gasPrice + gas.
- *  - eth_getLogs disabled on mainnet public RPC → not used; usage is read from
+ *  - eth_getLogs disabled on the mainnet public RPC → not used; usage is read from
  *    SponsorPolicyRegistry state directly.
  */
-// Chain id must match the RPC we point at (BOT testnet = 968; local fork = 31337).
+export type AmpereNetwork = "testnet" | "mainnet";
+
+const NETWORK_RAW = (process.env.AMPERE_NETWORK ?? "testnet").trim().toLowerCase();
+if (NETWORK_RAW !== "testnet" && NETWORK_RAW !== "mainnet") {
+  throw new Error(`AMPERE_NETWORK must be "testnet" or "mainnet", got "${process.env.AMPERE_NETWORK}"`);
+}
+export const NETWORK: AmpereNetwork = NETWORK_RAW;
+
+const PRESETS: Record<
+  AmpereNetwork,
+  { chainId: string; rpcUrl: string; explorerUrl: string; chainName: string }
+> = {
+  testnet: {
+    chainId: "968",
+    rpcUrl: "https://rpc.bohr.life",
+    explorerUrl: "https://scan.bohr.life",
+    chainName: "BOT Chain Testnet",
+  },
+  mainnet: {
+    chainId: "677",
+    rpcUrl: "https://rpc.botchain.ai",
+    explorerUrl: "https://scan.botchain.ai",
+    chainName: "BOT Chain Mainnet",
+  },
+};
+const preset = PRESETS[NETWORK];
+
+// Chain id must match the RPC we point at (testnet = 968, mainnet = 677; local fork = 31337).
 // viem signs EIP-155 with this id — a mismatch makes eth_sendRawTransaction fail.
-export const CHAIN_ID = Number(process.env.BOT_TESTNET_CHAIN_ID ?? "968");
-export const RPC_URL = process.env.BOT_TESTNET_RPC_URL ?? "https://rpc.bohr.life";
-export const DEFAULT_GAS_PRICE_WEI = 20n * 10n ** 9n; // 20 gwei
+export const CHAIN_ID = Number(
+  process.env[NETWORK === "mainnet" ? "BOT_MAINNET_CHAIN_ID" : "BOT_TESTNET_CHAIN_ID"] ?? preset.chainId
+);
+export const RPC_URL =
+  process.env[NETWORK === "mainnet" ? "BOT_MAINNET_RPC_URL" : "BOT_TESTNET_RPC_URL"] ?? preset.rpcUrl;
+export const EXPLORER_URL = preset.explorerUrl;
+export const CHAIN_NAME = preset.chainName;
+export const DEFAULT_GAS_PRICE_WEI = 20n * 10n ** 9n; // 20 gwei (eth_gasPrice on both nets)
 export const DEFAULT_GAS_LIMIT = 500_000n;
 
 export const RELAY_PRIVATE_KEY = required("RELAY_PRIVATE_KEY");

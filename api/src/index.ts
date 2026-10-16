@@ -25,6 +25,10 @@ import {
   setPolicy,
   depositNative,
   readPolicy,
+  NETWORK,
+  CHAIN_ID,
+  CHAIN_NAME,
+  EXPLORER_URL,
   type PolicyOnChain,
 } from "@ampere/relay/client";
 import {
@@ -137,7 +141,7 @@ const asyncH = (fn: (req: Request, res: Response) => Promise<void>) =>
 app.get("/v1/health", asyncH(async (_req, res) => {
   const block = await publicClient.getBlockNumber();
   const gasPrice = await currentGasPrice();
-  res.json({ ok: true, chain: "bot-testnet-968", block: block.toString(), gasPriceGwei: Number(gasPrice) / 1e9 });
+  res.json({ ok: true, chain: `bot-${NETWORK}-${CHAIN_ID}`, block: block.toString(), gasPriceGwei: Number(gasPrice) / 1e9 });
 }));
 
 // ---------- sponsors ----------
@@ -293,7 +297,7 @@ app.post("/v1/sponsors/:appKey/relay", asyncH(async (req, res) => {
       tx: result.txHash,
       status: result.success ? "success" : "failed",
       gasUsed: result.gasUsed.toString(),
-      explorer: `https://scan.bohr.life/tx/${result.txHash}`,
+      explorer: `${EXPLORER_URL}/tx/${result.txHash}`,
     });
   } catch (err: any) {
     recordRelayResult(appKey, ben, "0", false, "");
@@ -370,6 +374,6 @@ async function seedFromChain(appKey: string): Promise<void> {
     }
   }
   app.listen(PORT, () => {
-    console.log(`Ampere API listening on :${PORT} (BOT Chain testnet 968)`);
+    console.log(`Ampere API listening on :${PORT} (${CHAIN_NAME} ${CHAIN_ID})`);
   });
 })();

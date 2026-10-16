@@ -70,6 +70,15 @@ jobs:
           npm run smoke:testnet -w contracts || \
             echo "smoke skipped (needs deployed addresses)"
         working-directory: .
+      - name: Mainnet smoke (read-only)
+        env:
+          BOT_MAINNET_RPC_URL: https://rpc.botchain.ai
+          DEPLOYER_PRIVATE_KEY: ${{ secrets.DEPLOYER_PRIVATE_KEY }}
+        run: |
+          # read-only smoke against rpc.botchain.ai — skips until botMainnet.json exists
+          npm run smoke:mainnet -w contracts || \
+            echo "mainnet smoke skipped (needs botMainnet.json)"
+        working-directory: .
 
   secret-scan:
     runs-on: ubuntu-latest

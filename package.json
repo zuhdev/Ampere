@@ -2,7 +2,7 @@
   "name": "ampere",
   "version": "0.1.0",
   "private": true,
-  "description": "Ampere — gas-sponsorship (gasless) layer for BOT Chain testnet (chain 968)",
+  "description": "Ampere — gas-sponsorship (gasless) layer for BOT Chain (testnet 968 + mainnet 677)",
   "license": "MIT",
   "engines": {
     "node": ">=22"

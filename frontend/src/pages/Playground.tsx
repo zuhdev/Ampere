@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAccount, usePublicClient, useWriteContract, type UseWriteContractReturnType } from "wagmi";
 import { encodeFunctionData, formatEther } from "viem";
-import { COUNTER, DEMO_APP_KEY, API_URL, explorerTx } from "../lib/constants";
+import { COUNTER, DEMO_APP_KEY, API_URL, explorerTx, DEFAULT_GAS_PRICE_WEI } from "../lib/constants";
 import { counterAbi } from "../lib/abi";
 
 export default function Playground({ pushToast }: { pushToast: (k: any, t: string) => void }) {
@@ -51,14 +51,14 @@ export default function Playground({ pushToast }: { pushToast: (k: any, t: strin
             from: address,
             to: COUNTER,
             data: encodeFunctionData({ abi: counterAbi, functionName: "increment" }),
-            gasPrice: "0x4a817c800",
+            gasPrice: ("0x" + DEFAULT_GAS_PRICE_WEI.toString(16)) as `0x${string}`,
           },
         ],
       })) as `0x${string}`;
       if (!hash) throw new Error("no wallet provider");
       setDirectTx(hash);
       const rc = await publicClient.waitForTransactionReceipt({ hash });
-      pushToast("info", `Direct — you paid ${formatEther(rc.gasUsed * 20n * 10n ** 9n)} BOT`);
+      pushToast("info", `Direct — you paid ${formatEther(rc.gasUsed * DEFAULT_GAS_PRICE_WEI)} BOT`);
     } catch (e: any) {
       pushToast("err", String(e?.shortMessage ?? e?.message ?? e).slice(0, 140));
     } finally {

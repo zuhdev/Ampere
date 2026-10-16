@@ -1,0 +1,10 @@
+{
+  "network": "botMainnet",
+  "chainId": 677,
+  "deployer": "0x4441C5bB98eB33F7Be6CA59A131FE5267f2393FD",
+  "deployedAt": "2026-10-15T23:47:07.744Z",
+  "SponsorPolicyRegistry": "0x8ECe17195d5E2585F9fb16430A7959c52E612028",
+  "BudgetVault": "0x34531Bb172222EAf4F54c405c9874eAc002ecc1A",
+  "GaslessPaymaster": "0x0Cf96E419062d6C95596b2c77F01773897E77a56",
+  "Counter": "0xc1Ad3946d6376597127701117E7825A4CD3A3222"
+}

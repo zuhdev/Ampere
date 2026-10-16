@@ -1,0 +1,15 @@
+# Vercel CLI upload exclusions (git keeps ignoring these too)
+node_modules/
+.git/
+.env
+.env.*
+*.pem
+*.log
+*.tsbuildinfo
+dist/
+build/
+cache/
+artifacts/
+typechain-types/
+coverage/
+.vercel/

@@ -1,5 +1,6 @@
 /**
- * Ampere verify — source verification on scan.bohr.life.
+ * Ampere verify — source verification on the BOT Chain explorer
+ * (scan.bohr.life for testnet, scan.botchain.ai for mainnet).
  *
  * The BOT Chain explorer uses an ETHERSCAN-COMPATIBLE API (POST /api,
  * module=contract&action=verifysourcecode) — NOT Blockscout v2 REST paths.
@@ -19,7 +20,10 @@ import { loadDeployments } from "../deploy/deployments";
 
 dotenv.config();
 
-const API_URL = process.env.BOT_EXPLORER_API_URL ?? "https://scan.bohr.life/api";
+const isMainnet = network.name === "botMainnet";
+const API_URL =
+  (isMainnet ? process.env.BOT_MAINNET_EXPLORER_API_URL : process.env.BOT_EXPLORER_API_URL) ??
+  (isMainnet ? "https://scan.botchain.ai/api" : "https://scan.bohr.life/api");
 const API_KEY = process.env.ETHERSCAN_API_KEY ?? "";
 
 const CONTRACTS = [
@@ -41,6 +45,32 @@ interface BuildInfo {
 interface VerifyResponse {
   status: string;
   result: string;
+}
+
+/** POST to the explorer's Etherscan-compatible API. The mainnet explorer occasionally
+ *  answers HTML (rate-limit/maintenance) instead of JSON — retry before giving up. */
+async function postApi(fields: Record<string, string>, attempts = 6): Promise<VerifyResponse> {
+  let lastErr: unknown;
+  for (let i = 0; i < attempts; i++) {
+    try {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ apikey: API_KEY, ...fields }).toString(),
+      });
+      const text = await res.text();
+      if (!text.trimStart().startsWith("{")) {
+        throw new Error(`non-JSON response (HTTP ${res.status}): ${text.slice(0, 60).replace(/\s+/g, " ")}`);
+      }
+      return JSON.parse(text) as VerifyResponse;
+    } catch (err) {
+      lastErr = err;
+      const waitMs = 5_000 * (i + 1);
+      console.log(`  retry ${i + 1}/${attempts - 1} in ${waitMs / 1000}s — ${String((err as Error).message ?? err)}`);
+      await new Promise((r) => setTimeout(r, waitMs));
+    }
+  }
+  throw lastErr;
 }
 
 function findBuildInfo(contractName: string): BuildInfo {
@@ -72,20 +102,19 @@ async function verifyContract(
   ctorArgValues: unknown[]
 ) {
   console.log(`\nverifying ${contractName} at ${address}`);
-  const existing = await fetch(API_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({
-      apikey: API_KEY,
-      module: "contract",
-      action: "getsourcecode",
-      address,
-    }).toString(),
-  })
-    .then((r) => r.json() as Promise<{ result?: Array<{ IsProxy?: boolean }> }>)
-    .then((j) => j?.result?.[0]);
+  const existing = await postApi({
+    module: "contract",
+    action: "getsourcecode",
+    address,
+  }).then((j) => (j as unknown as { result?: Array<{ IsProxy?: boolean; ContractName?: string; SourceCode?: string }> })?.result?.[0]);
   if (existing?.IsProxy === true) {
     console.log("  proxy — skipping");
+    return;
+  }
+  // Already verified (matching name + stored source) — skip the submit entirely:
+  // re-submitting triggers the explorer's WAF (HTTP 403 HTML) and gains nothing.
+  if (existing?.ContractName === contractName && existing?.SourceCode) {
+    console.log("  already verified ✅");
     return;
   }
   const abiEncoded =
@@ -99,8 +128,7 @@ async function verifyContract(
   }
   const sourceCode = JSON.stringify(buildInfo.input);
 
-  const body = new URLSearchParams({
-    apikey: API_KEY,
+  const res = await postApi({
     module: "contract",
     action: "verifysourcecode",
     codeformat: "solidity-standard-json-input",
@@ -110,12 +138,6 @@ async function verifyContract(
     compilerversion: `v${buildInfo.solcLongVersion}`, // explorer's solc list is commit-exact
     constructorArguements: abiEncoded, // NOTE: explorer's spelling
   });
-
-  const res = await fetch(API_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: body.toString(),
-  }).then((r) => r.json() as Promise<VerifyResponse>);
 
   if (Number(res.status) !== 1) {
     if (String(res.result).toLowerCase().includes("already verified")) {
@@ -130,16 +152,11 @@ async function verifyContract(
 
   for (let i = 0; i < 30; i++) {
     await new Promise((r) => setTimeout(r, 10_000));
-    const check = await fetch(API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({
-        apikey: API_KEY,
-        module: "contract",
-        action: "checkverifystatus",
-        guid,
-      }).toString(),
-    }).then((r) => r.json() as Promise<VerifyResponse>);
+    const check = await postApi({
+      module: "contract",
+      action: "checkverifystatus",
+      guid,
+    }, 2);
     if (String(check.result) === "Pending in queue") continue;
     // Etherscan says "Successfully ..."; this explorer says "Pass - Verified"
     const ok = String(check.result).startsWith("Successfully") || String(check.result).startsWith("Pass");
@@ -154,7 +171,7 @@ async function verifyContract(
 }
 
 async function main() {
-  const d = loadDeployments("botTestnet");
+  const d = loadDeployments(network.name);
   console.log(`verifying on ${API_URL} (chain ${await network.provider.send("eth_chainId")})`);
 
   const vaultArgs = [d.GaslessPaymaster!, ethers.ZeroAddress];
@@ -174,9 +191,10 @@ async function main() {
       continue;
     }
     await verifyContract(job.name, address, job.types, job.values);
+    await new Promise((r) => setTimeout(r, 5_000)); // be polite to the explorer API
   }
 
-  console.log("\nverify pass complete. confirm is_fully_verified on scan.bohr.life.");
+  console.log(`\nverify pass complete. confirm is_fully_verified on ${isMainnet ? "scan.botchain.ai" : "scan.bohr.life"}.`);
 }
 
 main().catch((err) => {

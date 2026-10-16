@@ -3,6 +3,8 @@ import { privateKeyToAccount } from "viem/accounts";
 import { defineChain } from "viem";
 import {
   CHAIN_ID,
+  CHAIN_NAME,
+  EXPLORER_URL,
   RPC_URL,
   DEFAULT_GAS_PRICE_WEI,
   DEFAULT_GAS_LIMIT,
@@ -14,17 +16,17 @@ import {
 import { NonceQueue } from "./nonceQueue.js";
 import { recordRelay } from "./health.js";
 
-/** BOT Chain testnet — feeHistory is broken, so we always set explicit fees. */
-export const botTestnet = defineChain({
+/** BOT Chain (testnet or mainnet per AMPERE_NETWORK) — feeHistory is broken, so we always set explicit fees. */
+export const botChain = defineChain({
   id: CHAIN_ID,
-  name: "BOT Chain Testnet",
+  name: CHAIN_NAME,
   nativeCurrency: { name: "BOT", symbol: "BOT", decimals: 18 },
   rpcUrls: { default: { http: [RPC_URL] } },
-  blockExplorers: { default: { name: "scan", url: "https://scan.bohr.life" } },
+  blockExplorers: { default: { name: "scan", url: EXPLORER_URL } },
 });
 
 export const publicClient: PublicClient = createPublicClient({
-  chain: botTestnet,
+  chain: botChain,
   transport: http(RPC_URL),
 });
 
@@ -32,11 +34,13 @@ const account = privateKeyToAccount(RELAY_PRIVATE_KEY as `0x${string}`);
 
 export const walletClient: WalletClient = createWalletClient({
   account,
-  chain: botTestnet,
+  chain: botChain,
   transport: http(RPC_URL),
 });
 
 export const relayerAddress = account.address;
+
+export { NETWORK, CHAIN_ID, CHAIN_NAME, EXPLORER_URL, RPC_URL } from "./config.js";
 
 export const sponsorAbi = parseAbi([
   "function isSponsorable(bytes32 appKey, address target, address beneficiary, uint256 gasCost) view returns (bool)",
@@ -106,7 +110,7 @@ export async function relayWithRetry(req: RelayRequest): Promise<RelayResult> {
 
       const txHash = await walletClient.sendTransaction({
         account,
-        chain: botTestnet,
+        chain: botChain,
         to: PAYMASTER_ADDRESS as Address,
         data: encodeSponsorAndSend(req),
         value: req.value ?? 0n,
@@ -226,7 +230,7 @@ async function sendGovernanceTx(params: {
     nonce = await reserveNonce();
     const txHash = await walletClient.sendTransaction({
       account,
-      chain: botTestnet,
+      chain: botChain,
       to: params.to,
       data: params.data,
       value: params.value ?? 0n,

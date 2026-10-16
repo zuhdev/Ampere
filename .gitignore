@@ -26,3 +26,7 @@ npm-debug.log*
 # relay heartbeat counters (persisted, per-deployment)
 relay-state.json
 relay-state.json.tmp
+
+# vercel
+.vercel/
+

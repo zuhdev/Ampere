@@ -1,0 +1,922 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ampere — Gas Sponsorship for BOT Chain</title>
+    <meta
+      name="description"
+      content="Ampere lets an app pay its users' transaction fees on BOT Chain. On-chain sponsorship policy — allowlist, per-address caps, daily budgets — so users and agents transact with 0 BOT for gas."
+    />
+    <meta name="theme-color" content="#070a12" />
+    <meta property="og:title" content="Ampere — Gas Sponsorship for BOT Chain" />
+    <meta
+      property="og:description"
+      content="Your app declares one spending rule and covers the gas. Users sign normally and pay 0 BOT."
+    />
+    <meta property="og:type" content="website" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Alexandria:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body id="top">
+    <header class="nav" id="nav">
+      <div class="nav-inner">
+        <a class="brand" href="#top" aria-label="Ampere home">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 64 64" width="30" height="30" fill="none">
+              <rect width="64" height="64" rx="14" fill="#fff" />
+              <path d="M14 50 L32 12 L50 50" fill="none" stroke="#14161A" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M20.5 37 H26.5" stroke="#2E5BFF" stroke-width="7" stroke-linecap="round" />
+              <path d="M37.5 37 H43.5" stroke="#2E5BFF" stroke-width="7" stroke-linecap="round" />
+            </svg>
+          </span>
+          <span class="brand-name">Ampere</span>
+          <span class="brand-tag">/ BOT Chain</span>
+        </a>
+
+        <nav class="nav-links" id="navLinks" aria-label="Sections">
+          <a href="#problem">Problem</a>
+          <a href="#how">How it works</a>
+          <a href="#contracts">Contracts</a>
+          <a href="#policy">Policy</a>
+          <a href="#developers">Developers</a>
+          <a href="#security">Security</a>
+        </nav>
+
+        <div class="nav-actions">
+          <a class="btn btn-ghost btn-sm" href="https://github.com/zuhdev/Ampere" target="_blank" rel="noopener">GitHub</a>
+          <a class="btn btn-primary btn-sm" href="#start">Get started</a>
+        </div>
+
+        <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <!-- ============================ HERO ============================ -->
+      <section class="hero">
+        <div class="hero-glow" aria-hidden="true"></div>
+        <div class="container hero-grid">
+          <div class="hero-copy reveal">
+            <p class="eyebrow">Gas sponsorship · BOT Chain mainnet 677</p>
+            <h1 class="display">
+              Your app pays the gas.<br />
+              <span class="grad">Users pay 0 BOT.</span>
+            </h1>
+            <p class="lede">
+              On BOT Chain every action costs gas — paid in the network's own token — so a new user is stuck before they
+              even start. Ampere flips that. Your app declares one spending rule, then covers the gas on every eligible
+              transaction. The rule lives in the contracts, so not even a compromised server can overspend your budget.
+            </p>
+            <div class="cta-row">
+              <a class="btn btn-primary" href="#start">Start building</a>
+              <a class="btn btn-ghost" href="#how">See the architecture</a>
+            </div>
+            <dl class="stat-row">
+              <div class="stat">
+                <dt>4</dt>
+                <dd>contracts</dd>
+              </div>
+              <div class="stat">
+                <dt>21</dt>
+                <dd>Hardhat tests</dd>
+              </div>
+              <div class="stat">
+                <dt>2</dt>
+                <dd>EOA + 4337 paths</dd>
+              </div>
+              <div class="stat">
+                <dt>677</dt>
+                <dd>chain id, mainnet</dd>
+              </div>
+            </dl>
+          </div>
+
+          <div class="hero-code reveal">
+            <div class="code-card">
+              <div class="code-head">
+                <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                <span class="code-name">gasless.ts</span>
+                <button class="copy-btn" data-copy="hero" type="button">Copy</button>
+              </div>
+              <pre class="code-body"><code data-lang="ts" data-snippet="hero">import { Ampere } from "@ampere/sdk";
+
+const ampere = new Ampere({ appKey: APP_KEY });
+
+// would the policy sponsor this? reads chain, sends nothing
+const { sponsorable } = await ampere.simulate({ to, data });
+
+// Ampere relays it and pays the gas — the user holds 0 BOT
+const { tx, gasUsed } = await ampere.execute({
+  to,
+  data,
+  beneficiary: user.address,
+});
+
+// user signed normally: no faucet, no bridge, no fee prompt</code></pre>
+            </div>
+            <div class="code-note">
+              <span class="pulse" aria-hidden="true"></span>
+              <span>Relay path <code>sponsorAndSend()</code> — measured gas charged, remainder refunded.</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================ CHAIN STRIP ============================ -->
+      <div class="chain-strip">
+        <div class="container strip-inner">
+          <a class="chip" href="https://rpc.botchain.ai" target="_blank" rel="noopener"
+            ><span class="chip-k">RPC</span> rpc.botchain.ai</a
+          >
+          <a class="chip" href="https://scan.botchain.ai" target="_blank" rel="noopener"
+            ><span class="chip-k">Explorer</span> scan.botchain.ai</a
+          >
+          <span class="chip"><span class="chip-k">Chain</span> 677 (mainnet)</span>
+          <span class="chip"><span class="chip-k">Token</span> BOT</span>
+          <span class="chip"><span class="chip-k">Runtime</span> EVM · Solidity 0.8.20</span>
+          <span class="chip chip-ok"><span class="chip-k">Status</span> 4 contracts verified</span>
+        </div>
+      </div>
+
+      <!-- ============================ PROBLEM ============================ -->
+      <section class="section" id="problem">
+        <div class="container split">
+          <div class="reveal">
+            <p class="eyebrow">The problem</p>
+            <h2 class="h2">Gas is where BOT Chain apps lose their users</h2>
+            <div class="prose">
+              <p>
+                Before a new user can do anything in your app, they are asked to acquire BOT first — find a faucet,
+                wait, bridge, then approve a fee they do not understand. Every
+                <em>insufficient funds for gas</em> error is a user you already paid to acquire, and then watched walk
+                away.
+              </p>
+              <p>
+                Ampere removes that step. The app declares one rule — <strong>which</strong> contracts it will pay for,
+                a cap per user, a budget per day — and the paymaster covers the gas on every eligible transaction.
+                Users and agents sign normally and pay <strong>0 BOT</strong>.
+              </p>
+            </div>
+            <ul class="ticks">
+              <li>No faucet dependency for first-time users</li>
+              <li>No wallet pop-up asking for a fee the user cannot pay</li>
+              <li>Works for humans and autonomous agents from the same rule</li>
+            </ul>
+          </div>
+
+          <div class="panel reveal">
+            <p class="panel-title">Why plain wallets stall on BOT Chain</p>
+            <ul class="fault-list">
+              <li>
+                <span class="fault-x" aria-hidden="true">✕</span>
+                <div>
+                  <strong><code>eth_feeHistory</code> returns a zero base fee</strong>
+                  <p>EIP-1559 fee estimation collapses, so wallets that derive fees from history send nothing.</p>
+                </div>
+              </li>
+              <li>
+                <span class="fault-x" aria-hidden="true">✕</span>
+                <div>
+                  <strong><code>eth_estimateGas</code> is unreliable</strong>
+                  <p>Auto-estimated limits under-price writes, and a wrong limit means a reverted, wasted send.</p>
+                </div>
+              </li>
+              <li>
+                <span class="fault-x" aria-hidden="true">✕</span>
+                <div>
+                  <strong>New accounts start at 0 BOT</strong>
+                  <p>The very first action is impossible without an external token transfer.</p>
+                </div>
+              </li>
+              <li class="fault-ok">
+                <span class="fault-v" aria-hidden="true">✓</span>
+                <div>
+                  <strong>Ampere pins the fee and the limit</strong>
+                  <p>
+                    The relay reads <code>eth_gasPrice</code>, sets an explicit gas price and gas limit, then submits —
+                    the calibration is documented and covered by <code>gastrace</code>.
+                  </p>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================ HOW IT WORKS ============================ -->
+      <section class="section section-alt" id="how">
+        <div class="container">
+          <div class="head-center reveal">
+            <p class="eyebrow">How it works</p>
+            <h2 class="h2">Four steps, one of them on-chain</h2>
+            <p class="lede lede-center">
+              The API is convenience and telemetry. Every limit that matters is enforced by the contracts.
+            </p>
+          </div>
+
+          <ol class="steps reveal">
+            <li class="step">
+              <span class="step-n">1</span>
+              <h3>User signs</h3>
+              <p>The wallet signs the intent exactly as it normally would. No BOT balance, no fee prompt.</p>
+            </li>
+            <li class="step">
+              <span class="step-n">2</span>
+              <h3>API pre-checks</h3>
+              <p>Policy read, budget preview and rate limit in milliseconds — fast feedback, never the source of truth.</p>
+            </li>
+            <li class="step">
+              <span class="step-n">3</span>
+              <h3>Relay submits</h3>
+              <p>One signer, nonces serialized through a queue, 3 attempts with 1s → 2s → 4s backoff. Reverts are never retried.</p>
+            </li>
+            <li class="step step-accent">
+              <span class="step-n">4</span>
+              <h3>Paymaster pays</h3>
+              <p><code>isSponsorable()</code> gates the call on-chain, measured gas is charged against the budget, the rest is refunded.</p>
+            </li>
+          </ol>
+
+          <div class="flow reveal">
+            <div class="flow-row">
+              <div class="flow-node">
+                <span class="flow-k">client</span>
+                <strong>SDK / dApp</strong>
+                <em>signs the intent</em>
+              </div>
+              <span class="flow-arrow" aria-hidden="true">→</span>
+              <div class="flow-node flow-node-dashed">
+                <span class="flow-k">off-chain</span>
+                <strong>API :8787</strong>
+                <em>pre-check · rate limit</em>
+              </div>
+              <span class="flow-arrow" aria-hidden="true">→</span>
+              <div class="flow-node">
+                <span class="flow-k">signer</span>
+                <strong>Relay</strong>
+                <em>NonceQueue + retry</em>
+              </div>
+              <span class="flow-arrow" aria-hidden="true">→</span>
+              <div class="flow-node flow-node-hot">
+                <span class="flow-k">on-chain</span>
+                <strong>GaslessPaymaster</strong>
+                <em>pays the gas</em>
+              </div>
+              <span class="flow-arrow" aria-hidden="true">→</span>
+              <div class="flow-node">
+                <span class="flow-k">target</span>
+                <strong>Your contract</strong>
+                <em>executes</em>
+              </div>
+            </div>
+
+            <div class="flow-link" aria-hidden="true"><span>checked by</span></div>
+
+            <div class="flow-row flow-row-sub">
+              <div class="flow-node flow-node-chain">
+                <span class="flow-k">on-chain policy</span>
+                <strong>SponsorPolicyRegistry</strong>
+                <em>allowlist · caps · daily budget · pause</em>
+              </div>
+              <span class="flow-arrow" aria-hidden="true">+</span>
+              <div class="flow-node flow-node-chain">
+                <span class="flow-k">on-chain escrow</span>
+                <strong>BudgetVault</strong>
+                <em>deposits per appKey · owner-only withdraw</em>
+              </div>
+            </div>
+            <p class="flow-note">
+              The dashed box is the only off-chain piece. Delete it and the caps still hold — the paymaster calls the
+              registry before it pays.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================ CONTRACTS ============================ -->
+      <section class="section" id="contracts">
+        <div class="container">
+          <div class="head-center reveal">
+            <p class="eyebrow">Contracts</p>
+            <h2 class="h2">Four contracts, all verified on the explorer</h2>
+            <p class="lede lede-center">Deployed on BOT Chain mainnet (chain 677), source verified, wired together by one relayer key.</p>
+          </div>
+
+          <div class="cards cards-4">
+            <article class="card reveal">
+              <div class="card-ico" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 3l7 3.5v5c0 4.2-2.9 7.6-7 8.5-4.1-.9-7-4.3-7-8.5v-5z" />
+                  <path d="M9 12.2l2.1 2.1L15.2 10" />
+                </svg>
+              </div>
+              <h3>SponsorPolicyRegistry</h3>
+              <p>
+                One policy per <code>bytes32 appKey</code>: allowlist, blocklist, per-address cap over a rolling 24h
+                window, daily budget resetting 00:00 UTC, expiry and pause. Every sponsorship is gated by
+                <code>isSponsorable()</code>.
+              </p>
+              <div class="chips">
+                <code>setPolicy</code><code>isSponsorable</code><code>recordSpend</code><code>getPolicies</code>
+              </div>
+              <a
+                class="card-link"
+                href="https://scan.botchain.ai/address/0x8ECe17195d5E2585F9fb16430A7959c52E612028"
+                target="_blank"
+                rel="noopener"
+                >View on explorer →</a
+              >
+            </article>
+
+            <article class="card reveal">
+              <div class="card-ico" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M13.5 2.5L5 13.6h5.2L9 21.5l9-11.4h-5.3z" />
+                </svg>
+              </div>
+              <h3>GaslessPaymaster</h3>
+              <p>
+                Pays gas on both paths — EOA <code>sponsorAndSend()</code> and ERC-4337 v0.7
+                <code>validatePaymasterUserOp</code> / <code>postOp</code>. Charges the gas actually used, reverts
+                <code>GasBudgetExceeded</code> if it exceeds the authorized budget, refunds the remainder.
+              </p>
+              <div class="chips">
+                <code>sponsorAndSend</code><code>validatePaymasterUserOp</code><code>postOp</code>
+              </div>
+              <a
+                class="card-link"
+                href="https://scan.botchain.ai/address/0x0Cf96E419062d6C95596b2c77F01773897E77a56"
+                target="_blank"
+                rel="noopener"
+                >View on explorer →</a
+              >
+            </article>
+
+            <article class="card reveal">
+              <div class="card-ico" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="6" width="18" height="13" rx="2.5" />
+                  <path d="M3 10h18M16.5 14.5h1.5" />
+                </svg>
+              </div>
+              <h3>BudgetVault</h3>
+              <p>
+                Sponsorship escrow per <code>appKey</code>: <code>depositNative</code> to fund, <code>budgetOf</code> to
+                read, owner-only <code>withdraw</code> to take it back. It never holds user funds.
+              </p>
+              <div class="chips">
+                <code>depositNative</code><code>budgetOf</code><code>debit</code><code>withdraw</code>
+              </div>
+              <a
+                class="card-link"
+                href="https://scan.botchain.ai/address/0x34531Bb172222EAf4F54c405c9874eAc002ecc1A"
+                target="_blank"
+                rel="noopener"
+                >View on explorer →</a
+              >
+            </article>
+
+            <article class="card reveal">
+              <div class="card-ico" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="4" y="4" width="16" height="16" rx="3" />
+                  <path d="M12 8.5v7M8.5 12h7" />
+                </svg>
+              </div>
+              <h3>Counter</h3>
+              <p>
+                The demo target. A single <code>increment()</code> used by the relay playground, the e2e round trip and
+                the gasless-vs-direct comparison in the dashboard.
+              </p>
+              <div class="chips"><code>increment</code><code>count</code></div>
+              <a
+                class="card-link"
+                href="https://scan.botchain.ai/address/0xc1Ad3946d6376597127701117E7825A4CD3A3222"
+                target="_blank"
+                rel="noopener"
+                >View on explorer →</a
+              >
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================ POLICY ============================ -->
+      <section class="section section-alt" id="policy">
+        <div class="container split split-policy">
+          <div class="reveal">
+            <p class="eyebrow">The rule</p>
+            <h2 class="h2">The policy lives on-chain, not in your server</h2>
+            <div class="prose">
+              <p>
+                Caps, allowlists, expiry and pause are evaluated inside <code>isSponsorable()</code> — the exact call
+                the paymaster makes before it pays. The API can be bypassed, rate limits can be dodged, a server can be
+                compromised; none of that overspends a single extra wei.
+              </p>
+            </div>
+            <ul class="feature-list">
+              <li><strong>Allowlist</strong><span>Target contracts only — empty list is deny-all.</span></li>
+              <li><strong>Blocklist</strong><span>Hard excludes, checked before the allowlist.</span></li>
+              <li><strong>Per-address cap</strong><span>Rolling 24h ceiling per beneficiary.</span></li>
+              <li><strong>Daily budget</strong><span>Whole-app ceiling, resets 00:00 UTC.</span></li>
+              <li><strong>Expiry</strong><span>Unix timestamp — campaigns can end themselves.</span></li>
+              <li><strong>Pause</strong><span>Owner-only kill switch, one transaction.</span></li>
+            </ul>
+          </div>
+
+          <div class="policy-card reveal">
+            <div class="policy-head">
+              <div>
+                <span class="policy-label">Active policy</span>
+                <code class="policy-key">keccak256("ampere.demo")</code>
+              </div>
+              <span class="badge badge-ok">live</span>
+            </div>
+
+            <div class="policy-rows">
+              <div class="prow">
+                <span class="prow-k">allowlist</span>
+                <span class="prow-v"><code>Counter</code> <span class="dim">0x1b1d…b322</span></span>
+              </div>
+              <div class="prow">
+                <span class="prow-k">blocklist</span>
+                <span class="prow-v dim">empty</span>
+              </div>
+              <div class="prow">
+                <span class="prow-k">per-address cap</span>
+                <span class="prow-v">0.05 BOT <span class="dim">/ 24h</span></span>
+              </div>
+              <div class="prow">
+                <span class="prow-k">daily budget</span>
+                <span class="prow-v">200 BOT <span class="dim">/ day</span></span>
+              </div>
+              <div class="prow">
+                <span class="prow-k">expires</span>
+                <span class="prow-v">never</span>
+              </div>
+              <div class="prow">
+                <span class="prow-k">paused</span>
+                <span class="prow-v"><span class="badge badge-ok">false</span></span>
+              </div>
+            </div>
+
+            <div class="budget">
+              <div class="budget-top">
+                <span>Budget used today</span>
+                <span class="mono">42.8 / 200 BOT</span>
+              </div>
+              <div class="budget-bar"><span style="width: 21.4%"></span></div>
+              <div class="budget-foot">Resets at 00:00 UTC · window tracked on-chain by <code>daySpent()</code></div>
+            </div>
+
+            <div class="policy-call">
+              <span class="mono dim">registry.</span><span class="mono hi">isSponsorable</span
+              ><span class="mono">(appKey, target, beneficiary, gasCost)</span>
+              <span class="mono ret">→ bool</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================ DEVELOPERS ============================ -->
+      <section class="section" id="developers">
+        <div class="container">
+          <div class="head-center reveal">
+            <p class="eyebrow">Developers</p>
+            <h2 class="h2">Gasless in four lines</h2>
+            <p class="lede lede-center">One SDK for your app, one library for governance, plain HTTP for everything else.</p>
+          </div>
+
+          <div class="tabs reveal">
+            <div class="tab-bar" role="tablist">
+              <button class="tab is-active" data-tab="sdk" role="tab" aria-selected="true">sdk.ts</button>
+              <button class="tab" data-tab="policy" role="tab" aria-selected="false">policy.ts</button>
+              <button class="tab" data-tab="api" role="tab" aria-selected="false">relay.sh</button>
+              <button class="tab" data-tab="cli" role="tab" aria-selected="false">quickstart.sh</button>
+            </div>
+
+            <div class="code-card tab-panel is-active" data-panel="sdk">
+              <div class="code-head">
+                <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                <span class="code-name">@ampere/sdk</span>
+                <button class="copy-btn" data-copy="sdk" type="button">Copy</button>
+              </div>
+              <pre class="code-body"><code data-lang="ts" data-snippet="sdk">import { Ampere } from "@ampere/sdk";
+
+const ampere = new Ampere({ appKey: process.env.AMPERE_KEY });
+
+// 1. ask first — reads the on-chain policy, sends nothing
+const { sponsorable, gasCost, budgetRemaining } = await ampere.simulate({ to, data });
+
+// 2. execute — Ampere relays it and pays the gas
+const { tx, status, gasUsed, explorer } = await ampere.execute({
+  to,
+  data,
+  beneficiary: user.address,
+});
+
+// 3. telemetry for your dashboard
+const { relayed, failed, budgetUsed } = await ampere.usage();
+
+// helper: send an ERC-20 transfer with 0 BOT
+const data = Ampere.erc20Transfer(token, to, amount);</code></pre>
+            </div>
+
+            <div class="code-card tab-panel" data-panel="policy" hidden>
+              <div class="code-head">
+                <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                <span class="code-name">@ampere/relay/client</span>
+                <button class="copy-btn" data-copy="policy" type="button">Copy</button>
+              </div>
+              <pre class="code-body"><code data-lang="ts" data-snippet="policy">import { setPolicy, depositNative, readPolicy } from "@ampere/relay/client";
+import { keccak256, toHex, parseEther } from "viem";
+
+const appKey = keccak256(toHex("ampere.demo"));
+
+// declare the rule — written straight to SponsorPolicyRegistry
+await setPolicy(appKey, {
+  allowlist: [COUNTER],                    // only these targets get paid for
+  blocklist: [],
+  perAddressCap: parseEther("0.05"),       // per beneficiary, rolling 24h
+  dailyBudget: parseEther("200"),          // resets 00:00 UTC
+  expiresAt: 0n,                           // 0 = never expires
+  paused: false,
+});
+
+// fund the escrow the paymaster draws from
+await depositNative(appKey, parseEther("50"));
+
+console.log(await readPolicy(appKey));</code></pre>
+            </div>
+
+            <div class="code-card tab-panel" data-panel="api" hidden>
+              <div class="code-head">
+                <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                <span class="code-name">curl</span>
+                <button class="copy-btn" data-copy="api" type="button">Copy</button>
+              </div>
+              <pre class="code-body"><code data-lang="sh" data-snippet="api"># would this be sponsored? (no transaction)
+curl -X POST http://localhost:8787/v1/sponsors/$APP_KEY/simulate \
+  -H "content-type: application/json" \
+  -d '{"to":"0x1b1d2Db06F560Fe78B9018B6641358b0aBadb322","data":"0xd09de08a"}'
+
+# relay it — Ampere signs, submits and pays
+curl -X POST http://localhost:8787/v1/sponsors/$APP_KEY/relay \
+  -H "content-type: application/json" \
+  -d '{"to":"0x1b1d…b322","data":"0xd09de08a","beneficiary":"0xYourWallet"}'
+
+# usage + budget for this appKey
+curl http://localhost:8787/v1/sponsors/$APP_KEY/usage</code></pre>
+            </div>
+
+            <div class="code-card tab-panel" data-panel="cli" hidden>
+              <div class="code-head">
+                <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                <span class="code-name">terminal</span>
+                <button class="copy-btn" data-copy="cli" type="button">Copy</button>
+              </div>
+              <pre class="code-body"><code data-lang="sh" data-snippet="cli">npm install
+cp .env.example contracts/.env     # fill DEPLOYER_PRIVATE_KEY
+cp .env.example api/.env           # fill RELAY_PRIVATE_KEY + addresses
+
+npm run compile                    # hardhat compile
+npm test                           # 21 tests
+
+npm run deploy:mainnet -w contracts  # writes deployments/botMainnet.json (CONFIRM_MAINNET=1)
+npm run init:mainnet -w contracts    # INIT_FLOAT_BOT / INIT_VAULT_BOT required
+npm run deploy:testnet -w contracts  # testnet (968) instead
+
+npm run start -w relay             # heartbeat monitor
+npm run dev -w api                 # REST API on :8787
+npm run dev -w frontend            # dashboard on :5173</code></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================ API ============================ -->
+      <section class="section section-alt" id="api">
+        <div class="container">
+          <div class="head-center reveal">
+            <p class="eyebrow">REST API</p>
+            <h2 class="h2">Small surface, JSON in and out</h2>
+            <p class="lede lede-center">
+              Base URL <code>http://localhost:8787</code> · admin routes authenticated with <code>x-ampere-key</code> ·
+              writes are chain-first, so a failed <code>setPolicy</code> leaves no store record.
+            </p>
+          </div>
+
+          <div class="table-wrap reveal">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Method</th>
+                  <th>Path</th>
+                  <th>Auth</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="m m-get">GET</span></td>
+                  <td><code>/v1/health</code></td>
+                  <td class="dim">—</td>
+                  <td><code>{ ok, chain, block, gasPriceGwei }</code></td>
+                </tr>
+                <tr>
+                  <td><span class="m m-post">POST</span></td>
+                  <td><code>/v1/sponsors</code></td>
+                  <td>owner key</td>
+                  <td>Create sponsor — on-chain <code>setPolicy</code> (+ optional <code>depositBot</code>) first, then store</td>
+                </tr>
+                <tr>
+                  <td><span class="m m-patch">PATCH</span></td>
+                  <td><code>/v1/sponsors/:appKey</code></td>
+                  <td>owner key</td>
+                  <td>Update policy — chain-first, store untouched on failure</td>
+                </tr>
+                <tr>
+                  <td><span class="m m-post">POST</span></td>
+                  <td><code>/v1/sponsors/:appKey/simulate</code></td>
+                  <td class="dim">—</td>
+                  <td><code>{ sponsorable, policyPaused, gasCost, budgetRemaining }</code></td>
+                </tr>
+                <tr>
+                  <td><span class="m m-post">POST</span></td>
+                  <td><code>/v1/sponsors/:appKey/relay</code></td>
+                  <td class="dim">—</td>
+                  <td>Relays a call → <code>{ tx, status, gasUsed, explorer }</code> · rate-limited per appKey</td>
+                </tr>
+                <tr>
+                  <td><span class="m m-get">GET</span></td>
+                  <td><code>/v1/sponsors/:appKey/usage</code></td>
+                  <td class="dim">—</td>
+                  <td><code>{ relayed, failed, budgetUsed, budgetRemaining, perAddress }</code></td>
+                </tr>
+                <tr>
+                  <td><span class="m m-get">GET</span></td>
+                  <td><code>/v1/sponsors/:appKey/tx</code></td>
+                  <td class="dim">—</td>
+                  <td><code>{ recentTx: [...] }</code></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="err-row reveal">
+            <span class="err-chip"><code>401</code> bad owner key</span>
+            <span class="err-chip"><code>403</code> not policy owner</span>
+            <span class="err-chip"><code>404</code> unknown appKey</span>
+            <span class="err-chip"><code>422</code> relay failed</span>
+            <span class="err-chip"><code>429</code> rate limited</span>
+            <span class="err-chip"><code>502</code> chain write failed</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================ SECURITY ============================ -->
+      <section class="section" id="security">
+        <div class="container">
+          <div class="head-center reveal">
+            <p class="eyebrow">Security</p>
+            <h2 class="h2">Invariants, not intentions</h2>
+            <p class="lede lede-center">What the system guarantees even when everything around it misbehaves.</p>
+          </div>
+
+          <div class="cards cards-3">
+            <article class="card card-flat reveal">
+              <span class="card-n">01</span>
+              <h3>No user custody</h3>
+              <p>The vault holds sponsorship budget only. <code>withdraw</code> is owner-only; user funds never touch it.</p>
+            </article>
+            <article class="card card-flat reveal">
+              <span class="card-n">02</span>
+              <h3>Enforcement on-chain</h3>
+              <p>Caps, allowlist, expiry and pause are checked by <code>isSponsorable()</code> and the paymaster — not by the API.</p>
+            </article>
+            <article class="card card-flat reveal">
+              <span class="card-n">03</span>
+              <h3>Empty allowlist = deny-all</h3>
+              <p>A freshly created or misconfigured policy sponsors nothing until a target is explicitly added.</p>
+            </article>
+            <article class="card card-flat reveal">
+              <span class="card-n">04</span>
+              <h3>Reentrancy discipline</h3>
+              <p><code>nonReentrant</code> on state-mutating methods, state updated before external transfers, pause is owner-only.</p>
+            </article>
+            <article class="card card-flat reveal">
+              <span class="card-n">05</span>
+              <h3>Authenticated admin</h3>
+              <p>Admin routes require <code>x-ampere-key</code>; per-appKey ownership is <code>sha256(key)</code> in the store.</p>
+            </article>
+            <article class="card card-flat reveal">
+              <span class="card-n">06</span>
+              <h3>Bounded throughput</h3>
+              <p>Rate limit per appKey — 30 relays/min by default — plus a single serialized relayer nonce to avoid races.</p>
+            </article>
+          </div>
+
+          <div class="verify-strip reveal">
+            <div class="v-item"><strong>21</strong><span>Hardhat tests</span></div>
+            <div class="v-item"><strong>5</strong><span>workspaces typecheck</span></div>
+            <div class="v-item"><strong>CI</strong><span>compile · test · build · smoke</span></div>
+            <div class="v-item"><strong>secret</strong><span>scan rejects committed keys</span></div>
+            <div class="v-item"><strong>DRY_RUN</strong><span>default for recover:testnet</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================ ADDRESSES ============================ -->
+      <section class="section section-alt" id="addresses">
+        <div class="container">
+          <div class="head-center reveal">
+            <p class="eyebrow">Deployed</p>
+            <h2 class="h2">Mainnet addresses</h2>
+            <p class="lede lede-center">
+              Source of truth: <code>contracts/deployments/botMainnet.json</code>. All four verified on scan.botchain.ai
+              (chain 677).
+            </p>
+          </div>
+
+          <div class="table-wrap reveal">
+            <table class="table table-addr">
+              <thead>
+                <tr>
+                  <th>Contract</th>
+                  <th>Address</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>SponsorPolicyRegistry</td>
+                  <td>
+                    <a
+                      class="addr"
+                      href="https://scan.botchain.ai/address/0x8ECe17195d5E2585F9fb16430A7959c52E612028"
+                      target="_blank"
+                      rel="noopener"
+                      ><code>0x8ECe17195d5E2585F9fb16430A7959c52E612028</code></a
+                    >
+                  </td>
+                  <td><span class="badge badge-ok">verified</span></td>
+                </tr>
+                <tr>
+                  <td>BudgetVault</td>
+                  <td>
+                    <a
+                      class="addr"
+                      href="https://scan.botchain.ai/address/0x34531Bb172222EAf4F54c405c9874eAc002ecc1A"
+                      target="_blank"
+                      rel="noopener"
+                      ><code>0x34531Bb172222EAf4F54c405c9874eAc002ecc1A</code></a
+                    >
+                  </td>
+                  <td><span class="badge badge-ok">verified</span></td>
+                </tr>
+                <tr>
+                  <td>GaslessPaymaster</td>
+                  <td>
+                    <a
+                      class="addr"
+                      href="https://scan.botchain.ai/address/0x0Cf96E419062d6C95596b2c77F01773897E77a56"
+                      target="_blank"
+                      rel="noopener"
+                      ><code>0x0Cf96E419062d6C95596b2c77F01773897E77a56</code></a
+                    >
+                  </td>
+                  <td><span class="badge badge-ok">verified</span></td>
+                </tr>
+                <tr>
+                  <td>Counter</td>
+                  <td>
+                    <a
+                      class="addr"
+                      href="https://scan.botchain.ai/address/0xc1Ad3946d6376597127701117E7825A4CD3A3222"
+                      target="_blank"
+                      rel="noopener"
+                      ><code>0xc1Ad3946d6376597127701117E7825A4CD3A3222</code></a
+                    >
+                  </td>
+                  <td><span class="badge badge-ok">verified</span></td>
+                </tr>
+                <tr>
+                  <td>Relayer signer</td>
+                  <td><code>0x231F26764f7d9e3deB64818005Ca3115D17d2516</code></td>
+                  <td><span class="badge">EOA</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="net-grid reveal">
+            <div class="net-card"><span class="net-k">Chain ID</span><span class="net-v mono">677</span></div>
+            <div class="net-card"><span class="net-k">RPC</span><span class="net-v mono">https://rpc.botchain.ai</span></div>
+            <div class="net-card"><span class="net-k">Explorer</span><span class="net-v mono">https://scan.botchain.ai</span></div>
+            <div class="net-card"><span class="net-k">Native token</span><span class="net-v mono">BOT</span></div>
+            <div class="net-card"><span class="net-k">Solc</span><span class="net-v mono">0.8.20</span></div>
+            <div class="net-card"><span class="net-k">Scope</span><span class="net-v mono">mainnet 677 live · testnet 968 for dev</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================ START ============================ -->
+      <section class="section cta-section" id="start">
+        <div class="cta-glow" aria-hidden="true"></div>
+        <div class="container">
+          <div class="head-center reveal">
+            <p class="eyebrow">Get started</p>
+            <h2 class="h2">Ship a gasless app on BOT Chain</h2>
+            <p class="lede lede-center">Clone, compile, deploy, init — the demo policy is live in five commands.</p>
+          </div>
+
+          <div class="terminal reveal">
+            <div class="term-head">
+              <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+              <span class="code-name">bash</span>
+              <button class="copy-btn" data-copy="term" type="button">Copy</button>
+            </div>
+            <pre class="term-body"><code data-snippet="term"><span class="t-p">$</span> git clone https://github.com/zuhdev/Ampere.git &amp;&amp; cd Ampere
+<span class="t-p">$</span> npm install &amp;&amp; npm run compile &amp;&amp; npm test
+<span class="t-c"># → 21 passing</span>
+<span class="t-p">$</span> npm run deploy:mainnet -w contracts &amp;&amp; npm run init:mainnet -w contracts
+<span class="t-c"># → policy set: keccak256("ampere.demo")  allowlist [Counter]</span>
+<span class="t-p">$</span> npm run dev -w api
+<span class="t-c"># → API listening on http://localhost:8787</span></code></pre>
+          </div>
+
+          <div class="cta-links reveal">
+            <a class="btn btn-primary" href="https://github.com/zuhdev/Ampere" target="_blank" rel="noopener">View on GitHub</a>
+            <a
+              class="btn btn-ghost"
+              href="https://dev-docs.botchain.ai/docs/intro/"
+              target="_blank"
+              rel="noopener"
+              >BOT Chain dev docs</a
+            >
+            <a class="btn btn-ghost" href="https://scan.botchain.ai" target="_blank" rel="noopener">Block explorer</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container footer-grid">
+        <div class="footer-brand">
+          <a class="brand" href="#top">
+            <span class="brand-mark" aria-hidden="true">
+              <svg viewBox="0 0 64 64" width="30" height="30" fill="none">
+                            <rect width="64" height="64" rx="14" fill="#fff" />
+                            <path d="M14 50 L32 12 L50 50" fill="none" stroke="#14161A" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M20.5 37 H26.5" stroke="#2E5BFF" stroke-width="7" stroke-linecap="round" />
+                            <path d="M37.5 37 H43.5" stroke="#2E5BFF" stroke-width="7" stroke-linecap="round" />
+                        </svg>
+            </span>
+            <span class="brand-name">Ampere</span>
+          </a>
+          <p>Gas sponsorship for BOT Chain. Your app funds the gas; your users and agents sign with zero BOT.</p>
+        </div>
+
+        <div class="footer-col">
+          <h4>Project</h4>
+          <a href="https://github.com/zuhdev/Ampere" target="_blank" rel="noopener">Source code</a>
+          <a href="#contracts">Contracts</a>
+          <a href="#api">REST API</a>
+          <a href="#security">Security</a>
+        </div>
+
+        <div class="footer-col">
+          <h4>Network</h4>
+          <a href="https://www.botchain.ai/en/" target="_blank" rel="noopener">BOT Chain</a>
+          <a href="https://scan.botchain.ai" target="_blank" rel="noopener">Explorer</a>
+          <a href="https://rpc.botchain.ai" target="_blank" rel="noopener">RPC endpoint</a>
+          <a href="https://faucet.botchain.ai/" target="_blank" rel="noopener">Testnet faucet</a>
+        </div>
+
+        <div class="footer-col">
+          <h4>Stack</h4>
+          <span>Hardhat · Solidity 0.8.20</span>
+          <span>viem · TypeScript</span>
+          <span>Express · React + wagmi</span>
+          <span>Node ≥ 22</span>
+        </div>
+      </div>
+
+      <div class="container footer-bottom">
+        <span>MIT License · BOT Chain mainnet (chain 677) · testnet 968 for development</span>
+        <span class="mono dim">v0.1.0</span>
+      </div>
+    </footer>
+
+    <script src="main.js" defer></script>
+  </body>
+</html>

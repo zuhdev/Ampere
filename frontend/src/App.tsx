@@ -6,6 +6,7 @@ import Playground from "./pages/Playground";
 import Footer from "./components/Footer";
 import { AmpereMark } from "./components/Logo";
 import type { Tab } from "./lib/constants";
+import { CHAIN_ID, CHAIN_NAME, IS_MAINNET } from "./wagmi";
 
 export interface Toast {
   id: number;
@@ -64,9 +65,9 @@ export default function App() {
           </nav>
 
           <div className="header-right">
-            <span className="network-chip" title="BOT Chain testnet">
+            <span className="network-chip" title={CHAIN_NAME}>
               <span className="dot pulse" />
-              Testnet · 968
+              {IS_MAINNET ? "Mainnet" : "Testnet"} · {CHAIN_ID}
             </span>
             {isConnected ? (
               <button className="btn ghost mono" onClick={() => disconnect()} title="Disconnect">

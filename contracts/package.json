@@ -2,7 +2,7 @@
   "name": "@ampere/contracts",
   "version": "0.1.0",
   "private": true,
-  "description": "Ampere gas-sponsorship contracts for BOT Chain (testnet 968)",
+  "description": "Ampere gas-sponsorship contracts for BOT Chain (testnet 968 + mainnet 677)",
   "scripts": {
     "compile": "hardhat compile",
     "test": "hardhat test",
@@ -13,7 +13,14 @@
     "smoke:testnet": "hardhat run scripts/smoke.ts --network botTestnet",
     "e2e:testnet": "hardhat run scripts/e2e.ts --network botTestnet",
     "verify:testnet": "hardhat run scripts/verify.ts --network botTestnet",
-    "recover:testnet": "hardhat run scripts/recover-legacy.ts --network botTestnet"
+    "recover:testnet": "hardhat run scripts/recover-legacy.ts --network botTestnet",
+    "deploy:mainnet": "hardhat run scripts/deploy.ts --network botMainnet",
+    "init:mainnet": "hardhat run scripts/init.ts --network botMainnet",
+    "smoke:mainnet": "hardhat run scripts/smoke.ts --network botMainnet",
+    "e2e:mainnet": "hardhat run scripts/e2e.ts --network botMainnet",
+    "verify:mainnet": "hardhat run scripts/verify.ts --network botMainnet",
+    "set-relayer:testnet": "hardhat run scripts/set-relayer.ts --network botTestnet",
+    "set-relayer:mainnet": "hardhat run scripts/set-relayer.ts --network botMainnet"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
